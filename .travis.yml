@@ -22,7 +22,14 @@ jobs:
         - export AWS_ACCESS_KEY_ID=stsadmin AWS_SECRET_ACCESS_KEY=stsadmin-secret
         - gradle check
         - gradle shadowJar
+        - 
     - name: docker
       language: generic
       script:
         - docker build .
+
+    - name: test-infra
+      before_install:
+        - git clone --recurse-submodules git://github.com/openmicroscopy/omero-test-infra .omero
+      script:
+        - .omero/lib-docker
