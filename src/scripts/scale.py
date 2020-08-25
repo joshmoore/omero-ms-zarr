@@ -109,9 +109,13 @@ else:
     assert f"unknown method: {ns.method}"
 
 
-# 0. check that the output doesn't exist
-assert not os.path.exists(ns.output_directory)
+# 0. check that the output doesn't exist if not performing in_place scaling
+assert os.path.exists(ns.output_directory) == ns.in_place
 store = zarr.DirectoryStore(ns.output_directory)
+if ns.in_place:
+    assert os.path.basename(os.path.normpath(ns.input_array)) in [
+        ar[0] for ar in zarr.group(ns.output_directory).arrays()
+        ]
 
 
 # 1. open and create the pyramid
@@ -133,7 +137,8 @@ if ns.labeled:
 
 # 3. prepare the output store
 grp = zarr.group(store)
-grp.create_dataset("base", data=base)
+if not ns.in_place:
+    grp.create_dataset("base", data=base)
 
 if ns.copy_metadata:
     print(f"copying attribute keys: {list(base.attrs.keys())}")
